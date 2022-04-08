@@ -1,5 +1,4 @@
-const express = require('express');
-const logger = require('./logger')
+const express = require('express'); 
 
 const router = express.Router();
 //problem-1
@@ -40,5 +39,15 @@ else{
     res.send('no movie exixt with this id')
     } 
 });
+router.get('/missing', function (req, res) {
+    let arr=[1,2,3,4,5,7,8,9]
+    let a=0
+    for(i=0;i<arr.length;i++){
+         a +=arr[i]
+    }
+    
+    res.send(a)
+});
+
 module.exports = router;
 // adding this comment for no reason
