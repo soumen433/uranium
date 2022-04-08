@@ -39,15 +39,33 @@ else{
     res.send('no movie exixt with this id')
     } 
 });
-router.get('/missing', function (req, res) {
-    let arr=[1,2,3,4,5,7,8,9]
-    let a=0
-    for(i=0;i<arr.length;i++){
-         a +=arr[i]
-    }
-    
-    res.send(a)
-});
+// write an API which gives the missing number in an array of integers starting from 1...
+router.get('/missing1', function (req, res) {
+let a=[1,2,3,5,6,7,8,9]
+let total = 0;
+for (var i in a){
+   total +=a[i]
+}
+let lastN=a.pop()
+let sumOfall=lastN * (lastN +1) / 2
+let missN=sumOfall - total
 
+res.send({missing:missN})
+
+});
+//write an aPI  which gives the missing number in an array of integers starting from aNYwhere...
+router.get('/missing2', function (req, res) {
+    let a=[67,68,69,70,72,73]
+    let len=a.length
+    let total=0
+    for(var i in a){
+       total +=a[i]
+    }
+    let fast=a[0]
+    let last=a.pop()
+    let sumOfall= (len +1) * (fast+last)/2
+    let miss=sumOfall - total
+    res.send({missnum:miss})
+});
 module.exports = router;
 // adding this comment for no reason
