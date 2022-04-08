@@ -67,5 +67,19 @@ router.get('/missing2', function (req, res) {
     let miss=sumOfall - total
     res.send({missnum:miss})
 });
+let players =[{"name":"soumen","gen":"male","age":"24"},
+{"name":"maity","gen":"female","age":"56"},
+{"name":"valo","gen":"male","age":"23"},]
+router.post('/players',function(req,res){
+    let data1=req.body.name
+for(let i=0;i<players.length;i++){
+    if(players[i].name===data1){
+        res.send({data: players ,status:true})
+    }
+}
+let data2=req.body
+players.push(...data2)
+    res.send({data:players,status:false})
+}),
 module.exports = router;
 // adding this comment for no reason
