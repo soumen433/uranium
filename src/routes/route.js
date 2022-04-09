@@ -12,8 +12,8 @@ let players=[
       ]
     },
     {
-        "name": "manis",
-        "dob": "1/1/1995",
+        "name": "gopal",
+        "dob": "1/09/1995",
         "gender": "male",
         "city" : "jalandar",
         "sports": [
@@ -32,16 +32,23 @@ let players=[
     },
 ]
 router.post('/players', function (req, res) {
-    let getName = req.body.number
+    let getName = req.body.name
+    let fun1=function(getName){
     for(let i=0;i<players.length;i++){
-          if(players[i].name===getName){
-              res.send({data:players,status:true})
+        let b=players[i]
+          if(b.name===getName){
+              return true
           }
 
     }
-    let a=req.body
-    players={...players,...a}
-    res.send({data:players,status:true})
+    return false
+}
+    if(fun1(getName)===true){
+        res.send({data:players,status:false})
+    }else{
+        let a=req.body
+    let p={...players,...a}
+    res.send({data:p,status:true})}
 });
 
 module.exports = router;
