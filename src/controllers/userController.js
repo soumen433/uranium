@@ -22,9 +22,10 @@ const createUser = async function (req, res) {
         if (!data.name) {
             return res.status(400).send({ status: false, message: "name is required" })
         }
-        let Name = /^[A-Za-z ]{1,100}$/.test(data.name)
-        if (!Name) return res.status(400).send({ status: false, msg: " Name should not be numeric" })
-
+        let isValidName = /^[A-Za-z ]{1,100}$/
+        if (!isValidName.test(data.name)) {
+            return res.status(400).send({ status: false, msg: " Name should not be numeric" })
+        }
 
 
         //Validation on Phone Number
@@ -86,7 +87,7 @@ const createUser = async function (req, res) {
         res.status(201).send({ status: true, message: "success", data: users })
     }
     catch (err) {
-        res.status(500).send({ msg: "err.message" })
+        res.status(500).send({Satus: false, msg: "Error", error: err.message })
     }
 }
 
@@ -95,31 +96,36 @@ const createUser = async function (req, res) {
 const login = async function (req, res) {
     try {
         let data = req.body
+
+        //Check if Body is empty or not
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Data must be given inside body" })
         }
-        let email = req.body.email
-        let password = req.body.password
+        //Validation On email
         if (!email) {
             return res.status(400).send({ status: false, message: "email is required" })
         }
+        //Validation On password
         if (!password) {
             return res.status(400).send({ status: false, message: "password is required" })
         }
-        let checkUser = await userModel.findOne({ email: email, password: password })
+          //cheking the email and password
+        let checkUser = await userModel.findOne({ email: data.email, password: data.password })
         if (!checkUser) {
             return res.status(400).send({ status: false, message: "Email or Password is not valid" })
         }
+        //Token creation with userId, exp, iat 
         const token = jwt.sign({
             userId: checkUser._id,
             iat: Math.floor(Date.now() / 1000),
             exp: Math.floor(Date.now() / 1000) + (60 * 60) // Signing a token with 1 hour of expiration
         }, "group34")
-
+        
+        res.setHeader("x-api-key", token);   //set the token in response Header
         res.status(200).send({ status: true, message: "success", data: token })
     }
     catch (err) {
-        res.status(500).send({ msg: "err.message" })
+        res.status(500).send({Satus: false, msg: "Error", error: err.message })
     }
 }
 
