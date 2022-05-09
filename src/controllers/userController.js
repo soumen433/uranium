@@ -83,11 +83,11 @@ const createUser = async function (req, res) {
 
 
     let users = await userModel.create(data)
-    res.status(201).send({ status: true, data: users })
+    res.status(201).send({ status: true,message:"success", data: users })
 
 }
 
-//Login Function
+//**********************************************Login Function ************************************************
 
 const login = async function(req,res){
     let data = req.body
@@ -96,13 +96,23 @@ const login = async function(req,res){
     }
 let email = req.body.email
 let password = req.body.password
-
+if(!email) {
+    return res.status(400).send({status:false , message:"email is required" })
+}
+if(!password) {
+    return res.status(400).send({status:false , message:"password is required" })
+}
 let checkUser = await userModel.findOne({email:email , password : password})
 if(!checkUser){
     return res.status(400).send({status:false , message:"Email or Password is not valid" })
 }
-let token = jwt.sign()
+const token = jwt.sign({
+    userId: checkUser._id,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 
+}, "group34") 
 
+res.status(200).send({ status: true, message: "success", data: token })
 
 }
 
