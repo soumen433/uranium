@@ -102,11 +102,11 @@ const login = async function (req, res) {
             return res.status(400).send({ status: false, message: "Data must be given inside body" })
         }
         //Validation On email
-        if (!email) {
+        if (!data.email) {
             return res.status(400).send({ status: false, message: "email is required" })
         }
         //Validation On password
-        if (!password) {
+        if (!data.password) {
             return res.status(400).send({ status: false, message: "password is required" })
         }
           //cheking the email and password
