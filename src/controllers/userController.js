@@ -113,7 +113,7 @@ const login = async function (req, res) {
         const token = jwt.sign({
             userId: checkUser._id,
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 60 * 60
+            exp: Math.floor(Date.now() / 1000) + (60 * 60) // Signing a token with 1 hour of expiration
         }, "group34")
 
         res.status(200).send({ status: true, message: "success", data: token })
