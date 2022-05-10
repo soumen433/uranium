@@ -11,6 +11,16 @@ router.post("/register",userController.createUser)
 router.post("/login",userController.login)
 
 //book creation
-router.post("/books",bookController.createBook)
+router.post("/books",auth.authentication,bookController.createBook)
+
+//get books
+router.get("/books",auth.authentication,bookController.getBooks)
+
+//get books by id
+router.get("/books/:bookId",bookController.getBookSByBookId)
+
+//Update the datails of a book
+router.put("/books/:bookId",bookController.updateBook)
+
 
 module.exports =router
