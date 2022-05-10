@@ -1,5 +1,6 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
+const reviewModel=require("../models/reviewModel")
 
 
 const createBook = async function(req,res){
@@ -83,9 +84,36 @@ catch (err) {
 }
 }
 
+ 
+const getBooks=async function(req,res){
+     let data=req.query
+     //when filter(query)not used
+     if(Object.keys(data).length===0){
+             let allBooks= await bookModel.find({isDeleted:false}).select({ ISBN:0,subcategory:0, deletedAt:0,isDeleted:0,createdAt:0, updatedAt:0}).sort({title:1})
+             if(allBooks.length==0) return res.status(404).send({status:false,message:"No Books found"})
+            return res.status(200).send({stats:true,message:"Books list",data:allBooks})
+        }
+    //when filter used
+      let filterBooks=await bookModel.find({$and:[data,{isDeleted:false}]}).sort({title:1}) 
+      if(filterBooks.length==0) return res.status(404).send({status:false,message:"No Books found"})
+     return res.status(200).send({status:true,message:"Books list",data:filterBooks})
 
+}
+
+
+
+const getBookSByBookId= async function(req,res){
+    let data=req.params.bookId
+    let getBook=await bookModel.findOne({_id:data,isDeleted:false})
+    if(getBook===null) return res.stats(404).send({status:false,message:"BookId not exist"})
+   let reviewsData=await reviewModel.find({bookId:data,isDeleted:false})
+    getBook.reviewsData=reviewsData
+    return res.stats(200).send({status:true,message:"book list",data:getBook})
+}
 
 
 
 module.exports.createBook = createBook
+module.exports.getBooks=getBooks
+module.exports.getBookSByBookId=getBookSByBookId
 

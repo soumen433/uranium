@@ -13,4 +13,9 @@ router.post("/login",userController.login)
 //book creation
 router.post("/books",bookController.createBook)
 
+//get books
+router.get("/books",bookController.getBooks)
+//get books by ib
+router.get("/books/:bookId",bookController.getBookSByBookId)
+
 module.exports =router
