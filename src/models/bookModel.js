@@ -52,7 +52,7 @@ const bookSchema = new mongoose.Schema({
             require:true
         }
       
-    },{timeseries:true})
+    },{timestamps:true})
 
 
 
