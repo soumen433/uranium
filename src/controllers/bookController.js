@@ -190,7 +190,7 @@ const deleteData = async function (req,res){
     }
     //secussfully deleted book data
     else {
-        let FinalResult = await bookModel.findByIdAndUpdate(id, { isDeleted: true, deletedAt: new Date() }, { new: true })
+        let FinalResult = await bookModel.findByIdAndUpdate({_id:id}, { isDeleted: true, deletedAt: new Date() }, { new: true })
         return res.status(201).send({ Status: true, data: " Successfully deleted the blog ", FinalResult })
     }
 }
