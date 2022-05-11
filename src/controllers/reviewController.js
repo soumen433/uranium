@@ -33,7 +33,7 @@ if(!data.rating){
     return res.status(400).send({status:false , message:"rating is required"})
 }
 //validating the rating (min:1 and max:5) by using regex
-let isValidRating = /^[1-5]{1}[.]{1}[0-9]{1}$/
+let isValidRating = /^[1-5]{1}$/
 if(!(isValidRating.test(data.rating))){
     return res.status(400).send({status:false , message:"rating should be from 1 to 5"})
 }
