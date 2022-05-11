@@ -179,15 +179,19 @@ const updateBook = async function (req, res) {
 }
 
 
+//Function to delete the documents of book collection
 
 const deleteData = async function (req,res){
     try{
     let id = req.params.bookId
   
-    //check the data is deleted or not
+    //check if the document is found with that book id and check if it already deleted or not
     let verification = await bookModel.findById(id)
+    if(!verification){
+        return res.status(400).send({Status: false, msg: "Document Not Found"})
+    }
     if (verification.isDeleted === true) {
-        return res.status(400).send({Status: false, msg: "Data already deleted"})
+        return res.status(400).send({Status: false, msg: "Document already deleted"})
     }
     //secussfully deleted book data
     else {

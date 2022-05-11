@@ -27,15 +27,30 @@ catch(err){
 }
 
 //Creating authorization function
-// const authorization = async function(req,res,next){
-//  let    
-// let token = req['x-api-key']
-// let decodedToken = jwt.verify(token,"group34")
-// //console.log(decodedToken);
-// if(decodedToken.userId !==)
-// }
+const authorization = async function(req,res,next){
+ let data , bookId
+let token = req['x-api-key']
+let decodedToken = jwt.verify(token,"group34")
+if(data = req.body.userId){
+if(decodedToken.userId !== data){
+    return res.status(401).send({status:false , message:"You are not an authorized user"})
+}
+}
+
+if((bookId = req.params.bookId)){
+    let book = await bookModel.findOne({_id:bookId}) 
+    if(book == null){
+        return res.status(400).send({status:false , message:"Book Id not exist"})   
+    }
+    if(decodedToken.userId !== book.userId.toString()){
+        return res.status(401).send({status:false , message:"You are not an authorized user"})
+    }
+}
+
+next()
+}
 
 
 
 module.exports.authentication = authentication
-// module.exports.authorization = authorization
+module.exports.authorization = authorization
