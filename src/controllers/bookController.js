@@ -180,9 +180,32 @@ const updateBook = async function (req, res) {
 
 
 
+const deleteData = async function (req,res){
+    try{
+    let id = req.params.bookId
+  
+    //check the data is deleted or not
+    let verification = await bookModel.findById(id)
+    if (verification.isDeleted === true) {
+        return res.status(400).send({Status: false, msg: "Data already deleted"})
+    }
+    //secussfully deleted book data
+    else {
+        let FinalResult = await bookModel.findByIdAndUpdate({_id:id}, { isDeleted: true, deletedAt: new Date() }, { new: true })
+        return res.status(201).send({ Status: true, data: " Successfully deleted the blog ", FinalResult })
+    }
+}
+catch (err) {
+    return res.status(500).send({Status:false, msg: "Error", error: err.message })
+}
+}
+
+
+
+
 
 module.exports.createBook = createBook
 module.exports.getBooks = getBooks
 module.exports.getBookSByBookId = getBookSByBookId
 module.exports.updateBook = updateBook
-
+module.exports.deleteData = deleteData

@@ -22,5 +22,7 @@ router.get("/books/:bookId",bookController.getBookSByBookId)
 //Update the datails of a book
 router.put("/books/:bookId",bookController.updateBook)
 
+//deleted book
+router.delete("/books/:bookId",bookController.deleteData)
 
 module.exports =router
