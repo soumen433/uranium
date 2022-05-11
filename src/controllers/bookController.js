@@ -5,7 +5,7 @@ const reviewModel = require("../models/reviewModel")
 
 const createBook = async function (req, res) {
     try {
-        data = req.body
+        let data = req.body
 
         //Check if Body is empty or not
         if (Object.keys(data).length === 0) {
@@ -84,7 +84,7 @@ const createBook = async function (req, res) {
     }
 }
 
-
+//create function to fetch the Book documents by giving (some data) in query params
 const getBooks = async function (req, res) {
     try {
         let data = req.query
@@ -105,6 +105,7 @@ const getBooks = async function (req, res) {
 }
 
 
+//creating function to get documents of a book By giving bookid in params
 
 const getBookSByBookId = async function (req, res) {
     try {
@@ -142,7 +143,7 @@ const updateBook = async function (req, res) {
 
         //check if any data present in body or not
         if (Object.keys(data).length == 0) {
-            return res.status(400).send({ status: false, message: "Data mus be given for Updation" })
+            return res.status(400).send({ status: false, message: "Data must be given for Updation" })
         }
 
         //check if user giving field in body which are not supposed to get Update other than title , excerpt , realeasedAt , ISBN
@@ -168,7 +169,7 @@ const updateBook = async function (req, res) {
             { new: true }
         )
         if (!updateData) {
-            return res.status(400).send({ status: false, message: "BookId not Not found" })
+            return res.status(400).send({ status: false, message: "BookId Not found" })
         }
         return res.status(200).send({ status: true, message: "Updated Successfully", data: updateData })
     }

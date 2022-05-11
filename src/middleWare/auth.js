@@ -6,7 +6,7 @@ const authentication = async function(req,res,next){
 
     
     let token = req.headers["X-Api-Key"] || req.headers["x-api-key"] 
-    console.log(token);
+    
     if(!token){
         return res.status(400).send({status:false , message:"token must be present" })
     }

@@ -14,7 +14,7 @@ router.post("/login",userController.login)
 router.post("/books",auth.authentication,bookController.createBook)
 
 //get books
-router.get("/books",auth.authentication,bookController.getBooks)
+router.get("/books",bookController.getBooks)
 
 //get books by id
 router.get("/books/:bookId",bookController.getBookSByBookId)
