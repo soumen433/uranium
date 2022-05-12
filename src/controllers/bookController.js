@@ -84,7 +84,7 @@ const createBook = async function (req, res) {
     }
 }
 
-//create function to fetch the Book documents by giving (some data) in query params
+//**********creating a function to fetch the Book documents by giving (some data) in query params*********//
 const getBooks = async function (req, res) {
     try {
         let data = req.query
@@ -105,7 +105,7 @@ const getBooks = async function (req, res) {
 }
 
 
-//creating function to get documents of a book By giving bookid in params
+//****************creating function to get documents of a book By giving bookid in params********************//
 
 const getBookSByBookId = async function (req, res) {
     try {
@@ -135,7 +135,7 @@ const getBookSByBookId = async function (req, res) {
     }
 }
 
-//Update function
+//********************************Update function************************************************//
 const updateBook = async function (req, res) {
     try {
         let bookId = req.params.bookId
@@ -147,7 +147,7 @@ const updateBook = async function (req, res) {
         }
 
         //check if user giving field in body which are not supposed to get Update other than title , excerpt , realeasedAt , ISBN
-        if (!(data.title || data.excerpt || data.releasedAt || data.ISBN)) {
+        if (data.userId || data.category || data.subcategory || data.reviews ||data.deletedAt || data.isDeleted) {
             return res.status(400).send({ status: false, message: "You can only update title , excerpt , releasedAt , ISBN" })
         }
 //checking the uniqueness of title and ISBN
@@ -179,7 +179,7 @@ const updateBook = async function (req, res) {
 }
 
 
-//Function to delete the documents of book collection
+//**************************Function to delete the documents of book collection***********************//
 
 const deleteData = async function (req,res){
     try{
