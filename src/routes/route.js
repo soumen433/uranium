@@ -18,7 +18,7 @@ router.post("/books",auth.authentication,auth.authorization,bookController.creat
 router.get("/books",auth.authentication,bookController.getBooks)
 
 //get books by id
-router.get("/books/:bookId",auth.authentication,bookController.getBookSByBookId)
+router.get("/books/:bookId",bookController.getBookSByBookId)
 
 //Update the datails of a book
 router.put("/books/:bookId",auth.authentication,auth.authorization,bookController.updateBook)

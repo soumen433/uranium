@@ -1,6 +1,7 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const reviewModel = require("../models/reviewModel")
+const { json } = require("express/lib/response")
 
 
 const createBook = async function (req, res) {
@@ -112,22 +113,27 @@ const getBookSByBookId = async function (req, res) {
         let data = req.params.bookId
         let getBook = await bookModel.findOne({ _id: data, isDeleted: false })
         if (getBook === null) return res.status(404).send({ status: false, message: "BookId not exist" })
-        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false })
-        let finalData = {
-            "_id": getBook._id,
-            "title": getBook.title,
-            "excerpt": getBook.excerpt,
-            "userId": getBook.userId,
-            "category": getBook.category,
-            "subcategory": getBook.subcategory,
-            "deleted": getBook.deleted,
-            "reviews": getBook.reviews,
-            "deletedAt": getBook.deletedAt,
-            "releasedAt": getBook.releasedAt,
-            "createdAt": getBook.createdAt,
-            "updatedAt": getBook.updatedAt,
-            "reviewsData": reviewsData
-        }
+        console.log(getBook)
+        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false }).select({isDeleted:0,createdAt:0,updatedAt:0,__v:0})
+        let finalData=JSON.parse(JSON.stringify(getBook))
+
+        console.log(finalData)
+        finalData.reviewsData=reviewsData
+     ////   let finalData = {
+      //      "_id": getBook._id,
+      //      "title": getBook.title,
+       ///     "excerpt": getBook.excerpt,
+         //   "userId": getBook.userId,
+         //   "category": getBook.category,
+          //  "subcategory": getBook.subcategory,
+           // "deleted": getBook.deleted,
+           //// "reviews": getBook.reviews,
+           // "deletedAt": getBook.deletedAt,
+          //  "releasedAt": getBook.releasedAt,
+          //  "createdAt": getBook.createdAt,
+           // "updatedAt": getBook.updatedAt,
+           // "reviewsData": reviewsData
+    //    }
         return res.status(200).send({ status: true, message: "book list", data: finalData })
     }
     catch (error) {
