@@ -5,12 +5,14 @@ const bookController =require("../controllers/bookController")
 const reviewController=require("../controllers/reviewController")
 const auth = require("../middleWare/auth")
 
+//******************************User APIs************************************************* */
 //user creation
 router.post("/register",userController.createUser)
 
 //user Login
 router.post("/login",userController.login)
 
+//**********************************Book API*********************************************** */
 //book creation
 router.post("/books",auth.authentication,auth.authorization,bookController.createBook)
 
@@ -26,6 +28,14 @@ router.put("/books/:bookId",auth.authentication,auth.authorization,bookControlle
 //deleted book
 router.delete("/books/:bookId",auth.authentication,auth.authorization,bookController.deleteData)
 
-//Post api of review 
+
+//****************************************Review Api ******************************************/
+//Post API of review 
 router.post("/books/:bookId/review",reviewController.createReview)
+
+//put API of review
+router.put("/books/:bookId/review/:reviewId",reviewController.updateReview)
+
+//Delete API of review
+router.delete("/books/:bookId/review/:reviewId",reviewController.deleteReview)
 module.exports =router

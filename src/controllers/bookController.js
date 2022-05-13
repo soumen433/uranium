@@ -85,18 +85,18 @@ const createBook = async function (req, res) {
     }
 }
 
-//create function to fetch the Book documents by giving (some data) in query params
+//**********creating a function to fetch the Book documents by giving (some data) in query params*********//
 const getBooks = async function (req, res) {
     try {
         let data = req.query
         //when filter(query)not used
         if (Object.keys(data).length === 0) {
-            let allBooks = await bookModel.find({ isDeleted: false }).select({ ISBN: 0, subcategory: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
+            let allBooks = await bookModel.find({ isDeleted: false }).select({ ISBN: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
             if (allBooks.length == 0) return res.status(404).send({ status: false, message: "No Books found" })
             return res.status(200).send({ stats: true, message: "Books list", data: allBooks })
         }
         //when filter used
-        let filterBooks = await bookModel.find({ $and: [data, { isDeleted: false }] }).sort({ title: 1 })
+        let filterBooks = await bookModel.find({ $and: [data, { isDeleted: false }] }).select({ ISBN: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
         if (filterBooks.length == 0) return res.status(404).send({ status: false, message: "No Books found" })
         return res.status(200).send({ status: true, message: "Books list", data: filterBooks })
     }
@@ -106,34 +106,29 @@ const getBooks = async function (req, res) {
 }
 
 
-//creating function to get documents of a book By giving bookid in params
+//****************creating function to get documents of a book By giving bookid in params********************//
 
 const getBookSByBookId = async function (req, res) {
     try {
         let data = req.params.bookId
         let getBook = await bookModel.findOne({ _id: data, isDeleted: false })
         if (getBook === null) return res.status(404).send({ status: false, message: "BookId not exist" })
-        console.log(getBook)
-        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false }).select({isDeleted:0,createdAt:0,updatedAt:0,__v:0})
-        let finalData=JSON.parse(JSON.stringify(getBook))
-
-        console.log(finalData)
-        finalData.reviewsData=reviewsData
-     ////   let finalData = {
-      //      "_id": getBook._id,
-      //      "title": getBook.title,
-       ///     "excerpt": getBook.excerpt,
-         //   "userId": getBook.userId,
-         //   "category": getBook.category,
-          //  "subcategory": getBook.subcategory,
-           // "deleted": getBook.deleted,
-           //// "reviews": getBook.reviews,
-           // "deletedAt": getBook.deletedAt,
-          //  "releasedAt": getBook.releasedAt,
-          //  "createdAt": getBook.createdAt,
-           // "updatedAt": getBook.updatedAt,
-           // "reviewsData": reviewsData
-    //    }
+        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false }).select({isDeleted:0 ,updatedAt:0 ,createdAt:0 ,__v:0 })
+        let finalData = {
+            "_id": getBook._id,
+            "title": getBook.title,
+            "excerpt": getBook.excerpt,
+            "userId": getBook.userId,
+            "category": getBook.category,
+            "subcategory": getBook.subcategory,
+            "deleted": getBook.deleted,
+            "reviews": getBook.reviews,
+            "deletedAt": getBook.deletedAt,
+            "releasedAt": getBook.releasedAt,
+            "createdAt": getBook.createdAt,
+            "updatedAt": getBook.updatedAt,
+            "reviewsData": reviewsData
+        }
         return res.status(200).send({ status: true, message: "book list", data: finalData })
     }
     catch (error) {
@@ -141,7 +136,7 @@ const getBookSByBookId = async function (req, res) {
     }
 }
 
-//Update function
+//********************************Update function************************************************//
 const updateBook = async function (req, res) {
     try {
         let bookId = req.params.bookId
@@ -153,7 +148,7 @@ const updateBook = async function (req, res) {
         }
 
         //check if user giving field in body which are not supposed to get Update other than title , excerpt , realeasedAt , ISBN
-        if (!(data.title || data.excerpt || data.releasedAt || data.ISBN)) {
+        if (data.userId || data.category || data.subcategory || data.reviews ||data.deletedAt || data.isDeleted) {
             return res.status(400).send({ status: false, message: "You can only update title , excerpt , releasedAt , ISBN" })
         }
 //checking the uniqueness of title and ISBN
@@ -185,7 +180,7 @@ const updateBook = async function (req, res) {
 }
 
 
-//Function to delete the documents of book collection
+//**************************Function to delete the documents of book collection***********************//
 
 const deleteData = async function (req,res){
     try{
@@ -202,7 +197,7 @@ const deleteData = async function (req,res){
     //secussfully deleted book data
     else {
         let FinalResult = await bookModel.findByIdAndUpdate({_id:id}, { isDeleted: true, deletedAt: new Date() }, { new: true })
-        return res.status(201).send({ Status: true, data: " Successfully deleted the blog ", FinalResult })
+        return res.status(201).send({ Status: true, message: " Successfully deleted the blog ",data: FinalResult })
     }
 }
 catch (err) {
