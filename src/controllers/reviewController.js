@@ -72,81 +72,81 @@ const createReview = async function (req, res) {
 //*******************creating a function to update the document of review collection *****************************//
 
 const updateReview = async function (req, res) {
-    try{
-    let bookId = req.params.bookId
-    let reviewId = req.params.reviewId
+    try {
+        let bookId = req.params.bookId
+        let reviewId = req.params.reviewId
 
-    //Checking if book document is present in book Collection or not
-    let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!checkBook) {
-        return res.status(400).send({ status: false, message: "Book document not found" })
-    }
+        //Checking if book document is present in book Collection or not
+        let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        if (!checkBook) {
+            return res.status(400).send({ status: false, message: "Book document not found" })
+        }
 
-    //Checking if book document is present in book Collection or not
-    let checkReviewId = await reviewModel.findOne({ _id: reviewId, isDeleted: false })
-    if (!checkReviewId) {
-        return res.status(400).send({ status: false, message: "review document not found" })
-    }
+        //Checking if book document is present in book Collection or not
+        let checkReviewId = await reviewModel.findOne({ _id: reviewId, isDeleted: false })
+        if (!checkReviewId) {
+            return res.status(400).send({ status: false, message: "review document not found" })
+        }
 
-    let data = req.body
+        let data = req.body
 
-    //checking If any data is given inside body or not
-    if (Object.keys(data).length == 0) {
-        return res.status(400).send({ status: false, message: "Data must be given for updation" })
-    }
+        //checking If any data is given inside body or not
+        if (Object.keys(data).length == 0) {
+            return res.status(400).send({ status: false, message: "Data must be given for updation" })
+        }
 
-    // Only the values of review , rating , reviewer's name should be updated 
-    if (data.reviewedAt || data.bookId || data.isDeleted) {
-        return res.status(400).send({ status: false, message: "You can only update review , rating , reviewer's name" })
-    }
+        // Only the values of review , rating , reviewer's name should be updated 
+        if (data.reviewedAt || data.bookId || data.isDeleted) {
+            return res.status(400).send({ status: false, message: "You can only update review , rating , reviewer's name" })
+        }
 
-    //Updating the document of review collection
-      await reviewModel.findOneAndUpdate({ _id: reviewId },
-        data)
+        //Updating the document of review collection
+        await reviewModel.findOneAndUpdate({ _id: reviewId },
+            data)
 
         //
-    let findReview = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ isDeleted: 0, updatedAt: 0, createdAt: 0, __v: 0 })
+        let findReview = await reviewModel.findOne({ _id: reviewId, bookId: bookId, isDeleted: false }).select({ isDeleted: 0, updatedAt: 0, createdAt: 0, __v: 0 })
 
-    let findBook = await bookModel.findOne({ _id: bookId })
+        let findBook = await bookModel.findOne({ _id: bookId })
 
-    let newObj = JSON.parse(JSON.stringify(findBook))
-    convert.reviewsData = findReview
-    res.status(200).send({ status: true, message: "review update successfully", data: newObj })
-}
-catch(err){
-    res.status(500).send(err.message)
-}
+        let newObj = JSON.parse(JSON.stringify(findBook))
+        newObj.reviewsData = findReview
+        res.status(200).send({ status: true, message: "review update successfully", data: newObj })
+    }
+    catch (err) {
+        res.status(500).send(err.message)
+    }
 
 }
 
 //***********************************Function to Delete the document of the review collection***************** */
-const deleteReview = async function(req,res){
-try{
-    let bookId = req.params.bookId
-    let reviewId = req.params.reviewId
+const deleteReview = async function (req, res) {
+    try {
+        let bookId = req.params.bookId
+        let reviewId = req.params.reviewId
 
-    //Checking if book document is present in book Collection or not
-    let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
-    if (!checkBook) {
-        return res.status(400).send({ status: false, message: "Book document not found or already deleted" })
+        //Checking if book document is present in book Collection or not
+        let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
+        if (!checkBook) {
+            return res.status(400).send({ status: false, message: "Book document not found or already deleted" })
+        }
+
+        //Checking if book document is present in book Collection or not
+        let checkReviewId = await reviewModel.findOne({ _id: reviewId, bookId: bookId, isDeleted: false })
+        if (!checkReviewId) {
+            return res.status(400).send({ status: false, message: "Review document not found or already deleted" })
+        }
+        // Deleting the document by updating the isDeleted to True 
+        let deleteRev = await reviewModel.findOneAndUpdate({ _id: reviewId }, { $set: { isDeleted: true } }, { new: true })
+
+        await bookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: -1 } })
+
+        res.status(200).send({ status: true, message: "review is deleted successfully" })
     }
 
-    //Checking if book document is present in book Collection or not
-    let checkReviewId = await reviewModel.findOne({ _id: reviewId,bookId:bookId, isDeleted: false })
-    if (!checkReviewId) {
-        return res.status(400).send({ status: false, message: "Review document not found or already deleted" })
+    catch (err) {
+        res.status(500).send(err.message)
     }
-
-    let deleteRev = await reviewModel.findOneAndUpdate({_id:reviewId},{$set:{isDeleted:true}},{new:true})
-
-     await bookModel.findOneAndUpdate({_id:bookId},{$inc:{reviews:-1}})
-
-    res.status(200).send({status:true,message:"deleted successfully" , data:deleteRev})
-}
-
-catch(err){
-    res.status(500).send(err.message)
-}
 
 }
 

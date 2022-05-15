@@ -1,7 +1,7 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const reviewModel = require("../models/reviewModel")
-const { json } = require("express/lib/response")
+const res = require("express/lib/response")
 
 
 const createBook = async function (req, res) {
@@ -17,6 +17,8 @@ const createBook = async function (req, res) {
         if (!data.title) {
             return res.status(400).send({ status: false, message: "title is required" })
         }
+
+
 
         //Check if excerpt present in a body or not
         if (!data.excerpt) {
@@ -36,6 +38,12 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, message: "ISBN is required" })
         }
 
+        //validating ISBN Number (Format ==> 912-9856321879)
+
+        let isValidIsbn = /^[0-9]{3}[-]{1}[0-9]{10}$/
+        if (!isValidIsbn.test(data.ISBN)) {
+            return res.status(400).send({ status: false, message: "ISBN Number is not in a valid format (eg :- 912-9856321879) " })
+        }
         //Check if Category  present in a body or not
         if (!data.category) {
             return res.status(400).send({ status: false, message: "category is required" })
@@ -89,6 +97,7 @@ const createBook = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let data = req.query
+
         //when filter(query)not used
         if (Object.keys(data).length === 0) {
             let allBooks = await bookModel.find({ isDeleted: false }).select({ ISBN: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
@@ -96,9 +105,14 @@ const getBooks = async function (req, res) {
             return res.status(200).send({ stats: true, message: "Books list", data: allBooks })
         }
         //when filter used
-        let filterBooks = await bookModel.find({ $and: [data, { isDeleted: false }] }).select({ ISBN: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
-        if (filterBooks.length == 0) return res.status(404).send({ status: false, message: "No Books found" })
-        return res.status(200).send({ status: true, message: "Books list", data: filterBooks })
+        if (!(data.excerpt || data.title || data.ISBN || data.review)) {
+            let filterBooks = await bookModel.find({ $and: [data, { isDeleted: false }] }).select({ ISBN: 0, deletedAt: 0, isDeleted: 0, createdAt: 0, updatedAt: 0 }).sort({ title: 1 })
+            if (filterBooks.length == 0) return res.status(404).send({ status: false, message: "No Books found" })
+            return res.status(200).send({ status: true, message: "Books list", data: filterBooks })
+        }
+        else {
+            return res.status(400).send({ status: false, message: "please select the query :- userId , category , subcategory" })
+        }
     }
     catch (error) {
         res.status(500).send({ status: false, message: error.message })
@@ -113,7 +127,7 @@ const getBookSByBookId = async function (req, res) {
         let data = req.params.bookId
         let getBook = await bookModel.findOne({ _id: data, isDeleted: false })
         if (getBook === null) return res.status(404).send({ status: false, message: "BookId not exist" })
-        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false }).select({isDeleted:0 ,updatedAt:0 ,createdAt:0 ,__v:0 })
+        let reviewsData = await reviewModel.find({ bookId: data, isDeleted: false }).select({ isDeleted: 0, updatedAt: 0, createdAt: 0, __v: 0 })
         let finalData = {
             "_id": getBook._id,
             "title": getBook.title,
@@ -148,16 +162,25 @@ const updateBook = async function (req, res) {
         }
 
         //check if user giving field in body which are not supposed to get Update other than title , excerpt , realeasedAt , ISBN
-        if (data.userId || data.category || data.subcategory || data.reviews ||data.deletedAt || data.isDeleted) {
+        if (data.userId || data.category || data.subcategory || data.reviews || data.deletedAt || data.isDeleted) {
             return res.status(400).send({ status: false, message: "You can only update title , excerpt , releasedAt , ISBN" })
         }
-//checking the uniqueness of title and ISBN
+        //validating ISBN Number (Format ==> 912-9856321879)
+        let isValidIsbn = /^[0-9]{3}[-]{1}[0-9]{10}$/
+        if (!isValidIsbn.test(data.ISBN)) {
+            return res.status(400).send({ status: false, message: "ISBN Number is not in a valid format (eg :- 912-9856321879) " })
+        }
+
+        //checking the uniqueness of title and ISBN
         let checkUnique = await bookModel.findOne({ $or: [{ title: data.title }, { ISBN: data.ISBN }] })
 
         if (checkUnique) {
             if (checkUnique.title === data.title) {
                 return res.status(400).send({ status: false, message: "Title is already present" })
             }
+
+
+
             if (checkUnique.ISBN === data.ISBN) {
                 return res.status(400).send({ status: false, message: "ISBN is already present" })
             }
@@ -182,27 +205,27 @@ const updateBook = async function (req, res) {
 
 //**************************Function to delete the documents of book collection***********************//
 
-const deleteData = async function (req,res){
-    try{
-    let id = req.params.bookId
-  
-    //check if the document is found with that book id and check if it already deleted or not
-    let verification = await bookModel.findById(id)
-    if(!verification){
-        return res.status(400).send({Status: false, msg: "Document Not Found"})
+const deleteData = async function (req, res) {
+    try {
+        let id = req.params.bookId
+
+        //check if the document is found with that book id and check if it already deleted or not
+        let verification = await bookModel.findById(id)
+        if (!verification) {
+            return res.status(400).send({ Status: false, msg: "Document Not Found" })
+        }
+        if (verification.isDeleted === true) {
+            return res.status(400).send({ Status: false, msg: "Document already deleted" })
+        }
+        //secussfully deleted book data
+        else {
+            let FinalResult = await bookModel.findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: new Date() }, { new: true })
+            return res.status(201).send({ Status: true, message: " Successfully deleted the book "})
+        }
     }
-    if (verification.isDeleted === true) {
-        return res.status(400).send({Status: false, msg: "Document already deleted"})
+    catch (err) {
+        return res.status(500).send({ Status: false, msg: "Error", error: err.message })
     }
-    //secussfully deleted book data
-    else {
-        let FinalResult = await bookModel.findByIdAndUpdate({_id:id}, { isDeleted: true, deletedAt: new Date() }, { new: true })
-        return res.status(201).send({ Status: true, message: " Successfully deleted the blog ",data: FinalResult })
-    }
-}
-catch (err) {
-    return res.status(500).send({Status:false, msg: "Error", error: err.message })
-}
 }
 
 
