@@ -80,18 +80,18 @@ const updateReview = async function (req, res) {
         //Checking if book document is present in book Collection or not
         let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!checkBook) {
-            return res.status(400).send({ status: false, message: "Book document not found" })
+            return res.status(404).send({ status: false, message: "Book document not found" })
         }
 
         //Checking if book document is present in book Collection or not
         let checkReviewId = await reviewModel.findOne({ _id: reviewId, isDeleted: false })
         if (!checkReviewId) {
-            return res.status(400).send({ status: false, message: "review document not found" })
+            return res.status(404).send({ status: false, message: "review document not found" })
         }
 
         let data = req.body
         let isValidRating = /^[1-5]{1}$/
-        if (!(isValidRating.test(data.rating))) {
+        if (!isValidRating.test(data.rating)&&data.rating) {
             return res.status(400).send({ status: false, message: "rating should be from  integer 1 to 5" })
         }
         //checking If any data is given inside body or not
@@ -123,6 +123,7 @@ const updateReview = async function (req, res) {
 
 }
 
+
 //***********************************Function to Delete the document of the review collection***************** */
 const deleteReview = async function (req, res) {
     try {
@@ -132,13 +133,13 @@ const deleteReview = async function (req, res) {
         //Checking if book document is present in book Collection or not
         let checkBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!checkBook) {
-            return res.status(400).send({ status: false, message: "Book document not found or already deleted" })
+            return res.status(404).send({ status: false, message: "Book document not found " })
         }
 
         //Checking if book document is present in book Collection or not
         let checkReviewId = await reviewModel.findOne({ _id: reviewId, bookId: bookId, isDeleted: false })
         if (!checkReviewId) {
-            return res.status(400).send({ status: false, message: "Review document not found or already deleted" })
+            return res.status(404).send({ status: false, message: "Review document not found " })
         }
         // Deleting the document by updating the isDeleted to True 
         let deleteRev = await reviewModel.findOneAndUpdate({ _id: reviewId }, { $set: { isDeleted: true } }, { new: true })

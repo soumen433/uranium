@@ -1,7 +1,7 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const reviewModel = require("../models/reviewModel")
-const res = require("express/lib/response")
+//const res = require("express/lib/response")
 
 
 const createBook = async function (req, res) {
@@ -167,25 +167,26 @@ const updateBook = async function (req, res) {
         }
         //validating ISBN Number (Format ==> 912-9856321879)
         let isValidIsbn = /^[0-9]{3}[-]{1}[0-9]{10}$/
-        if (!isValidIsbn.test(data.ISBN)) {
+        if (!isValidIsbn.test(data.ISBN)&&data.ISBN) {
             return res.status(400).send({ status: false, message: "ISBN Number is not in a valid format (eg :- 912-9856321879) " })
         }
 
         //checking the uniqueness of title and ISBN
-        let checkUnique = await bookModel.findOne({ $or: [{ title: data.title }, { ISBN: data.ISBN }] })
+        let checkUniqueTitle = await bookModel.findOne({ title: data.title })
 
-        if (checkUnique) {
-            if (checkUnique.title === data.title) {
+        if (checkUniqueTitle) {
+            
                 return res.status(400).send({ status: false, message: "Title is already present" })
             }
 
+            let checkUniqueISBN = await bookModel.findOne({ ISBN: data.ISBN})
 
-
-            if (checkUnique.ISBN === data.ISBN) {
+            if (checkUniqueISBN) {
+            
                 return res.status(400).send({ status: false, message: "ISBN is already present" })
             }
-        }
-
+        
+    
         //Updation of a book
         let updateData = await bookModel.findOneAndUpdate(
             { _id: bookId, isDeleted: false },
@@ -193,15 +194,16 @@ const updateBook = async function (req, res) {
             { new: true }
         )
         if (!updateData) {
-            return res.status(400).send({ status: false, message: "BookId Not found" })
+            return res.status(404).send({ status: false, message: "BookId Not found" })
         }
         return res.status(200).send({ status: true, message: "Updated Successfully", data: updateData })
     }
     catch (err) {
         return res.status(500).send(err.message)
     }
-}
 
+
+}
 
 //**************************Function to delete the documents of book collection***********************//
 
@@ -212,7 +214,7 @@ const deleteData = async function (req, res) {
         //check if the document is found with that book id and check if it already deleted or not
         let verification = await bookModel.findById(id)
         if (!verification) {
-            return res.status(400).send({ Status: false, msg: "Document Not Found" })
+            return res.status(404).send({ Status: false, msg: "Document Not Found" })
         }
         if (verification.isDeleted === true) {
             return res.status(400).send({ Status: false, msg: "Document already deleted" })
@@ -220,14 +222,13 @@ const deleteData = async function (req, res) {
         //secussfully deleted book data
         else {
             let FinalResult = await bookModel.findByIdAndUpdate({ _id: id }, { isDeleted: true, deletedAt: new Date() }, { new: true })
-            return res.status(201).send({ Status: true, message: " Successfully deleted the book "})
+            return res.status(200).send({ Status: true, message: " Successfully deleted the book "})
         }
     }
     catch (err) {
         return res.status(500).send({ Status: false, msg: "Error", error: err.message })
     }
 }
-
 
 
 
