@@ -1,11 +1,41 @@
 const bookModel = require("../models/bookModel")
 const userModel = require("../models/userModel")
 const reviewModel = require("../models/reviewModel")
+const aws= require("aws-sdk")
 //const res = require("express/lib/response")
-
+aws.config.update({
+    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
+    secretAccessKey: "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",
+    region: "ap-south-1"
+})
+let uploadFile= async ( file) =>{
+    return new Promise( function(resolve, reject) {
+     // this function will upload file to aws and return the link
+     let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
+ 
+     var uploadParams= {
+         ACL: "public-read",
+         Bucket: "classroom-training-bucket",  //HERE
+         Key: "soumen/" + file.originalname, //HERE 
+         Body: file.buffer
+     }
+ 
+ 
+     s3.upload( uploadParams, function (err, data ){
+         if(err) {
+             return reject({"error": err})
+         }
+         console.log(data)
+         console.log("file uploaded succesfully")
+         return resolve(data.Location)
+              })
+    
+    })
+}
 
 const createBook = async function (req, res) {
     try {
+
         let data = req.body
 
         //Check if Body is empty or not
@@ -80,7 +110,19 @@ const createBook = async function (req, res) {
         if (checkIsbn) {
             return res.status(400).send({ status: false, message: "ISBN is already present" })
         }
-
+        //usging aws
+        let files= req.files
+        if(files && files.length>0){
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL= await uploadFile( files[0] )
+            res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
+///adding new key
+    data.bookCover=uploadedFileURL
         // creating the documents of book collection
         let books = await bookModel.create(data)
 
